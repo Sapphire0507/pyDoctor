@@ -11,14 +11,14 @@ class EnvironmentInspector:
         self.project = project
 
     def find_virtual_environments(self) -> list[Path]:
-            project_path = Path(self.project.path)
-            environments = []
-            for item in project_path.iterdir():
-                if item.is_dir():
-                    config_file = item / "pyvenv.cfg"
-                    if config_file.is_file():
-                        environments.append(item)
-            return environments
+        project_path = Path(self.project.path)
+        environments = []
+        for item in project_path.iterdir():
+            if item.is_dir():
+                config_file = item / "pyvenv.cfg"
+                if config_file.is_file():
+                    environments.append(item)
+        return environments
 
     def inspect(self) -> list[DiagnosticFinding]:
         environments = self.find_virtual_environments()

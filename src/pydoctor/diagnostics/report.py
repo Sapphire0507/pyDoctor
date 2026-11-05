@@ -11,10 +11,10 @@ class DiagnosticReport:
     project : ProjectInfo
     findings : list[DiagnosticFinding] = field(default_factory = list)
 
-    def add_finding(self, finding):
+    def add_finding(self, finding : DiagnosticFinding) -> None:
         self.findings.append(finding)
 
-    def add_multiple_findings(self, findings):
+    def add_multiple_findings(self, findings : list[DiagnosticFinding]) -> None:
         self.findings.extend(findings)
 
     def get_findings_by_severity(self, severity : Severity) -> list[DiagnosticFinding]:

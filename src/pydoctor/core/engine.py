@@ -25,5 +25,5 @@ class DiagnosticEngine:
             return report
         environment_inspector = EnvironmentInspector(project)
         environment_findings = environment_inspector.inspect()
-        report.add_finding(environment_findings)
+        report.add_multiple_findings(environment_findings)
         return report
