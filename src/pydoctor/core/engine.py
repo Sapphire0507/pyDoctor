@@ -2,6 +2,7 @@ from ..diagnostics.finding import DiagnosticFinding
 from ..diagnostics.report import DiagnosticReport
 from ..diagnostics.severity import Severity
 from ..inspectors.environment import EnvironmentInspector
+from ..inspectors.interpreter import InterpreterInspector
 from .discovery import inspect_project
 
 
@@ -19,11 +20,14 @@ class DiagnosticEngine:
                     code = "PRJ001",
                     severity = Severity.WARNING,
                     title = "Not a recognized python project",
-                    description = "No recognized Python project files or Python source files were detected"
+                    description = "No recognized Python project files or Python source files were detected."
                 )
             )
             return report
         environment_inspector = EnvironmentInspector(project)
         environment_findings = environment_inspector.inspect()
         report.add_multiple_findings(environment_findings)
+        interpreter_inspector = InterpreterInspector(project)
+        interpreter_findings = interpreter_inspector.inspect()
+        report.add_multiple_findings(interpreter_findings)
         return report

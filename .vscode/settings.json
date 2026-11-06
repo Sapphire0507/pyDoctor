@@ -1,6 +1,11 @@
 {
     "cSpell.words": [
+        "addopts",
         "pydoctor",
-        "pyvenv"
+        "pytest",
+        "pythonpath",
+        "pyvenv",
+        "setuptools",
+        "testpaths"
     ]
 }
