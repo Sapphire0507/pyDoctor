@@ -6,11 +6,11 @@ from packaging.requirements import Requirement
 
 @dataclass
 class DependencyRequirement:
-    requirement : Requirement
-    source : Path
-    group : str = "main"
-    line_number : int | None = None
-    raw = str = ""
+    requirement: Requirement
+    source: Path
+    group: str = "main"
+    line_number: int | None = None
+    raw: str = ""
 
     @property
     def name(self) -> str:

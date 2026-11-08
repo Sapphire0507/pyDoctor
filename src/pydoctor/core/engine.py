@@ -1,6 +1,7 @@
 from ..diagnostics.finding import DiagnosticFinding
 from ..diagnostics.report import DiagnosticReport
 from ..diagnostics.severity import Severity
+from ..inspectors.dependencies import DependencyInspector
 from ..inspectors.environment import EnvironmentInspector
 from ..inspectors.interpreter import InterpreterInspector
 from .discovery import inspect_project
@@ -30,4 +31,7 @@ class DiagnosticEngine:
         interpreter_inspector = InterpreterInspector(project)
         interpreter_findings = interpreter_inspector.inspect()
         report.add_multiple_findings(interpreter_findings)
+        dependency_inspector = DependencyInspector(project)
+        dependency_findings = dependency_inspector.inspect()
+        report.add_multiple_findings(dependency_findings)
         return report
