@@ -1,9 +1,11 @@
 from ..diagnostics.finding import DiagnosticFinding
 from ..diagnostics.report import DiagnosticReport
 from ..diagnostics.severity import Severity
+from ..inspectors.configuration import ConfigurationInspector
 from ..inspectors.dependencies import DependencyInspector
 from ..inspectors.environment import EnvironmentInspector
 from ..inspectors.interpreter import InterpreterInspector
+from ..inspectors.structure import StructureInspector
 from .discovery import inspect_project
 
 
@@ -25,13 +27,25 @@ class DiagnosticEngine:
                 )
             )
             return report
+        
         environment_inspector = EnvironmentInspector(project)
         environment_findings = environment_inspector.inspect()
         report.add_multiple_findings(environment_findings)
+
         interpreter_inspector = InterpreterInspector(project)
         interpreter_findings = interpreter_inspector.inspect()
         report.add_multiple_findings(interpreter_findings)
+
         dependency_inspector = DependencyInspector(project)
         dependency_findings = dependency_inspector.inspect()
         report.add_multiple_findings(dependency_findings)
+
+        configuration_inspector = ConfigurationInspector(project)
+        configuration_findings = configuration_inspector.inspect()
+        report.add_multiple_findings(configuration_findings)
+
+        structure_inspector = StructureInspector(project)
+        structure_findings = structure_inspector.inspect()
+        report.add_multiple_findings(structure_findings)
+
         return report

@@ -142,3 +142,33 @@ def test_engine_detects_pyproject_dependencies(tmp_path):
 
     assert "DEP001" in codes
 
+
+def test_engine_runs_configuration_inspection(tmp_path):
+    (tmp_path / "main.py").touch()
+
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\n'
+        'name = "example"\n'
+        'version = "1.0.0"\n'
+    )
+
+    engine = DiagnosticEngine(str(tmp_path))
+    report = engine.scan()
+
+    codes = [finding.code for finding in report.findings]
+
+    assert "CFG007" in codes
+
+
+def test_engine_runs_structure_inspection(tmp_path):
+    (tmp_path / "main.py").touch()
+
+    engine = DiagnosticEngine(str(tmp_path))
+    report = engine.scan()
+
+    codes = [finding.code for finding in report.findings]
+
+    assert "STR001" in codes
+    assert "STR002" in codes
+    assert "STR003" in codes
+    assert "STR006" in codes
