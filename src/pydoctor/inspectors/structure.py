@@ -97,7 +97,11 @@ class StructureInspector:
                             severity = Severity.WARNING,
                             title = "Package initializer missing",
                             description = f"The directory '{package_directory}' contains Python modules but no __init__.py.",
-                            location = package_directory
+                            location = package_directory,
+                            details = {
+                                "directory" : str(package_directory),
+                                "initializer" : str(package_directory / "__init__.py"),
+                            }
                         )
                     )
         return findings

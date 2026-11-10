@@ -17,6 +17,9 @@ dev = [
     "pytest>=8.0"
 ]
 
+[project.scripts]
+pydoctor = "pydoctor.cli:main"
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 

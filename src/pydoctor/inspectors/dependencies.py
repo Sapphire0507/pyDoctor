@@ -294,7 +294,14 @@ class DependencyInspector:
                             code = "DEP001",
                             severity = Severity.ERROR,
                             title = "Missing dependency",
-                            description = f"Package '{dependency.name}' is declared, but it is not installed in the project environment."
+                            description = f"Package '{dependency.name}' is declared, but it is not installed in the project environment.",
+                            location = dependency.source,
+                            details = {
+                                "package" : dependency.name,
+                                "requirement" : dependency.raw,
+                                "group" : dependency.group,
+                                "line_number" : dependency.line_number
+                            }
                         )
                     )
                     continue
@@ -306,7 +313,14 @@ class DependencyInspector:
                             severity = Severity.ERROR,
                             title = "Dependency version mismatch",
                             description = f"Package '{dependency.name}' has version {installed_version} but the project requires '{specifier}'.",
-                            location = dependency.source
+                            location = dependency.source,
+                            details={
+                                "package": dependency.name,
+                                "requirement": dependency.raw,
+                                "installed_version": str(installed_version),
+                                "group": dependency.group,
+                                "line_number": dependency.line_number,
+                            }
                         )
                     )
         return findings 
