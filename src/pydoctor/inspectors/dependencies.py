@@ -11,6 +11,7 @@ from ..diagnostics.dependency import DependencyRequirement
 from ..diagnostics.finding import DiagnosticFinding
 from ..diagnostics.severity import Severity
 from .environment import EnvironmentInspector
+from .source import SourceDependencyInspector
 
 
 class DependencyInspector:
@@ -254,73 +255,164 @@ class DependencyInspector:
                 installed_packages[normalized_name] = version
         return installed_packages
 
+
     def inspect(self) -> list[DiagnosticFinding]:
         dependencies, findings = self.discover_dependencies()
-        if not dependencies:
+        dependency_files = self.find_dependency_files()
+        if not dependency_files:
+            source_result = SourceDependencyInspector(
+                self.project_path
+            ).inspect()
+            requirements = source_result["requirements"]
+            if requirements:
+                findings.append(
+                    DiagnosticFinding(
+                        code="DEP007",
+                        severity=Severity.INFO,
+                        title="Dependencies discovered from source code",
+                        description=(
+                            f"Discovered {len(requirements)} third-party "
+                            "dependencies from Python source files. "
+                            "A requirements.txt file can be generated."
+                        ),
+                        location=self.project_path,
+                        details={
+                            "requirements": requirements,
+                            "files_scanned": source_result["files_scanned"],
+                        },
+                    )
+                )
+            unresolved = source_result["unresolved"]
+            if unresolved:
+                findings.append(
+                    DiagnosticFinding(
+                        code="DEP008",
+                        severity=Severity.WARNING,
+                        title="Unresolved Python imports",
+                        description=(
+                            "Some imports could not be confidently "
+                            "identified as installable distributions."
+                        ),
+                        location=self.project_path,
+                        details={
+                            "imports": unresolved,
+                        },
+                    )
+                )
+            if source_result["errors"]:
+                findings.append(
+                    DiagnosticFinding(
+                        code="DEP009",
+                        severity=Severity.WARNING,
+                        title="Some Python files could not be analysed",
+                        description=(
+                            f"{len(source_result['errors'])} Python files "
+                            "could not be completely parsed."
+                        ),
+                        location=self.project_path,
+                        details={
+                            "errors": source_result["errors"],
+                        },
+                    )
+                )
+        if not dependencies and not any(
+            finding.code == "DEP007"
+            for finding in findings
+        ):
             findings.append(
                 DiagnosticFinding(
-                    code = "DEP004",
-                    severity = Severity.INFO,
-                    title = "No dependencies detected",
-                    description = "No valid dependency declarations were found in the recognized dependency files."
+                    code="DEP004",
+                    severity=Severity.INFO,
+                    title="No dependencies detected",
+                    description=(
+                        "No valid dependency declarations or "
+                        "confidently identifiable third-party "
+                        "dependencies were found."
+                    ),
                 )
             )
-        environments = EnvironmentInspector(self.project).find_virtual_environments()
+        environments = EnvironmentInspector(
+            self.project
+        ).find_virtual_environments()
         if not environments and dependencies:
             findings.append(
                 DiagnosticFinding(
-                    code = "DEP006",
-                    severity = Severity.WARNING,
-                    title = "Dependency environment unavailable",
-                    description = "Dependencies were declared, but no project-local virtual environment was found. Installed package compatibility could not be verified"
+                    code="DEP006",
+                    severity=Severity.WARNING,
+                    title="Dependency environment unavailable",
+                    description=(
+                        "Dependencies were declared, but no "
+                        "project-local virtual environment was found. "
+                        "Installed package compatibility could not "
+                        "be verified."
+                    ),
                 )
             )
             return findings
         for environment in environments:
-            installed_packages = self.get_installed_packages(environment)
+            installed_packages = self.get_installed_packages(
+                environment
+            )
             for dependency in dependencies:
                 marker = dependency.requirement.marker
                 if marker is not None:
                     marker_environment = {}
                     if dependency.group != "main":
                         marker_environment["extra"] = dependency.group
-                    if not marker.evaluate(environment = marker_environment):
+                    if not marker.evaluate(
+                        environment=marker_environment
+                    ):
                         continue
-                normalized_name = canonicalize_name(dependency.name)
-                installed_version = installed_packages.get(normalized_name)
+                normalized_name = canonicalize_name(
+                    dependency.name
+                )
+                installed_version = installed_packages.get(
+                    normalized_name
+                )
                 if installed_version is None:
                     findings.append(
                         DiagnosticFinding(
-                            code = "DEP001",
-                            severity = Severity.ERROR,
-                            title = "Missing dependency",
-                            description = f"Package '{dependency.name}' is declared, but it is not installed in the project environment.",
-                            location = dependency.source,
-                            details = {
-                                "package" : dependency.name,
-                                "requirement" : dependency.raw,
-                                "group" : dependency.group,
-                                "line_number" : dependency.line_number
-                            }
+                            code="DEP001",
+                            severity=Severity.ERROR,
+                            title="Missing dependency",
+                            description=(
+                                f"Package '{dependency.name}' is "
+                                "declared, but it is not installed "
+                                "in the project environment."
+                            ),
+                            location=dependency.source,
+                            details={
+                                "package": dependency.name,
+                                "requirement": dependency.raw,
+                                "group": dependency.group,
+                                "line_number": dependency.line_number,
+                            },
                         )
                     )
                     continue
                 specifier = dependency.requirement.specifier
-                if specifier and not specifier.contains(installed_version, prereleases = True):
+                if specifier and not specifier.contains(
+                    installed_version,
+                    prereleases=True,
+                ):
                     findings.append(
                         DiagnosticFinding(
-                            code = "DEP002",
-                            severity = Severity.ERROR,
-                            title = "Dependency version mismatch",
-                            description = f"Package '{dependency.name}' has version {installed_version} but the project requires '{specifier}'.",
-                            location = dependency.source,
+                            code="DEP002",
+                            severity=Severity.ERROR,
+                            title="Dependency version mismatch",
+                            description=(
+                                f"Package '{dependency.name}' has "
+                                f"version {installed_version} but "
+                                f"the project requires '{specifier}'."
+                            ),
+                            location=dependency.source,
                             details={
                                 "package": dependency.name,
                                 "requirement": dependency.raw,
                                 "installed_version": str(installed_version),
                                 "group": dependency.group,
                                 "line_number": dependency.line_number,
-                            }
+                            },
                         )
                     )
-        return findings 
+        return findings

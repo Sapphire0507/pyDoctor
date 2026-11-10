@@ -436,7 +436,7 @@ def main() -> None:
         terminal.error(str(error))
         exit_code = 1
 
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001
         terminal.error(
             f"An unexpected error occurred: {error}"
         )

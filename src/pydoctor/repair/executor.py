@@ -1,5 +1,9 @@
 from pathlib import Path
 
+from .configuration import (
+    ConfigurationRepair,
+    ConfigurationRepairError,
+)
 from .dependencies import (
     DependencyRepair,
     DependencyRepairError,
@@ -25,6 +29,10 @@ class RepairExecutor:
         self.project_path = project_path.resolve()
 
         self.environment_repair = EnvironmentRepair(
+            self.project_path
+        )
+
+        self.configuration_repair = ConfigurationRepair(
             self.project_path
         )
 
@@ -119,6 +127,72 @@ class RepairExecutor:
 
         return output or "Dependencies verified successfully."
 
+    
+    def execute_generate_requirements(
+        self,
+        operation: RepairOperation,
+    ) -> str:
+
+        requirements = operation.details.get(
+            "requirements",
+            [],
+        )
+
+        if not isinstance(requirements, list):
+            raise DependencyRepairError(
+                "Invalid discovered dependency list."
+            )
+
+        if not all(
+            isinstance(item, str)
+            for item in requirements
+        ):
+            raise DependencyRepairError(
+                "A discovered dependency is not a string."
+            )
+
+        target = self.dependency_repair.write_requirements(
+            requirements
+        )
+
+        return (
+            f"Generated {target.name} with "
+            f"{len(requirements)} dependencies."
+        )
+
+
+    def execute_generate_pyproject(
+        self,
+        operation: RepairOperation,
+    ) -> str:
+
+        requirements = operation.details.get(
+            "requirements",
+            [],
+        )
+
+        if not isinstance(requirements, list):
+            raise ConfigurationRepairError(
+                "Invalid discovered dependency list."
+            )
+
+        if not all(
+            isinstance(item, str)
+            for item in requirements
+        ):
+            raise ConfigurationRepairError(
+                "A discovered dependency is not a string."
+            )
+
+        target = self.configuration_repair.generate(
+            requirements
+        )
+
+        return (
+            f"Generated {target.name} with "
+            f"{len(requirements)} discovered dependencies."
+        )
+
     def execute_structure(
         self,
         operation: RepairOperation
@@ -145,6 +219,18 @@ class RepairExecutor:
             if operation.operation == "create_environment":
 
                 message = self.execute_environment(operation)
+
+            elif operation.operation == "generate_requirements":
+
+                message = self.execute_generate_requirements(
+                    operation
+                )
+
+            elif operation.operation == "generate_pyproject":
+
+                message = self.execute_generate_pyproject(
+                    operation
+                )
 
             elif operation.operation == "install_dependencies":
 
@@ -175,6 +261,7 @@ class RepairExecutor:
         except (
             EnvironmentRepairError,
             DependencyRepairError,
+            ConfigurationRepairError,
             StructureRepairError,
             OSError,
             ValueError,

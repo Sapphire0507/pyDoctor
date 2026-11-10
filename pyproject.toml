@@ -40,7 +40,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "packaging>=24.0"
+    "packaging>=24.0",
+    "rich>=13.9.0"
 ]
 
 [project.urls]
