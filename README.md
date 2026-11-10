@@ -1,361 +1,312 @@
-
 # pyDoctor
 
-A Python project diagnostics and repair assistant.
+**A Python project diagnostics and repair tool.**
 
-pyDoctor is a modular command-line tool designed to inspect Python projects, identify common development environment and configuration issues, and perform safe, automated repairs.
+pyDoctor is a command-line utility designed to inspect Python projects, identify common environment and configuration issues, and help developers resolve them through a structured repair workflow.
 
-Its goal is to take care of the repetitive setup and maintenance tasks involved in working with Python projects.
+It brings project validation, Python environment management, dependency detection, and automated repairs into one tool.
+
+Instead of manually troubleshooting project setup problems, developers can use pyDoctor to diagnose a project, review a repair plan, apply the necessary changes, and verify the results.
+
+---
 
 ## Features
 
-### Project Discovery
-- Python project identification
-- Project directory validation
-- Project file discovery
+### Project Diagnostics
+- Validate Python project directories.
+- Inspect Python interpreter availability and compatibility.
+- Detect virtual environment issues.
+- Identify missing dependencies.
+- Inspect project configuration and structure.
+- Generate structured diagnostic findings.
 
-### Environment Diagnostics
-- Virtual environment detection
-- Python interpreter identification
-- Python version requirement validation
+### Dependency Management
+- Detect dependencies by inspecting project source files.
+- Identify missing dependencies.
+- Install declared main dependencies.
+- Respect project dependency constraints.
+- Verify installed dependencies using `pip check`.
 
-### Dependency Diagnostics
-- Dependency discovery from `requirements.txt`
-- `pyproject.toml` dependency parsing
-- `Pipfile` dependency parsing
-- Installed package inspection
-- Missing dependency detection
-- Dependency version mismatch detection
+### Environment Management
+- Detect existing local virtual environments.
+- Create a `.venv` when one is missing.
+- Reuse an existing valid environment.
+- Select a compatible Python interpreter based on project requirements.
 
-### Configuration Diagnostics
-- TOML syntax validation
-- Project metadata validation
-- Python requirement validation
-- Build-system configuration inspection
+### Automated Repairs
+- Generate structured repair plans.
+- Execute approved repair operations.
+- Create missing project configuration files where applicable.
+- Create missing `__init__.py` files in supported project locations.
+- Verify repairs after execution.
+- Maintain repair history.
 
-### Project Structure Diagnostics
-- README, LICENSE, and `.gitignore` detection
-- Source directory inspection
-- Python package initializer checks
-- Tests directory detection
+### Developer Experience
+- Rich terminal output and progress indicators.
+- Detailed diagnostic findings through verbose mode.
+- Interactive repair confirmation.
+- Automatic repair approval when explicitly requested.
+- Structured error handling.
 
-### Repair Engine
-- Automatic virtual environment creation
-- Python interpreter selection
-- Missing dependency installation
-- Incompatible dependency updates
-- Missing package initializer creation
-- Repair execution tracking
-- Post-repair verification
+---
 
-### PYDZ Diagnostic Records
-- Save diagnostic results as `.pydz` files
-- Load existing diagnostic records
-- Store repair history
-- Store post-repair verification results
-- Update records without losing previous repair history
+## How It Works
 
-### Command-Line Interface
-- Project diagnosis
-- Repair execution from existing PYDZ records
-- Combined diagnose, repair, and verification workflow
-- Repair plan preview
-- Interactive repair confirmation
-- Automatic confirmation with `--yes`
-- Verbose diagnostic output
-- Severity-based diagnostic summaries
-- Colored terminal output
-- Clear error handling
+pyDoctor follows a structured workflow:
 
-## Requirements
+```text
+       Python Project
+              |
+              v
+       Project Inspection
+              |
+              v
+       Diagnostics
+              |
+              v
+       Repair Plan (.pydz)
+              |
+              v
+       User Confirmation
+              |
+              v
+       Repair Execution
+              |
+              v
+       Verification
+```
 
-- Python 3.11 or newer
-- pip
-- Linux for the convenience installer scripts
+The workflow is designed to separate identifying problems from modifying a project.
 
-The Python package itself is platform-independent.
+### The PYDZ Format
+
+pyDoctor uses `.pydz` files to store structured repair plans.
+
+A PYDZ file uses a JSON-based format and contains information such as:
+
+- Project path and ownership information.
+- Diagnostic findings.
+- Proposed repair operations.
+- Verification information.
+- Repair execution history.
+
+This allows repair plans to be generated, reviewed, and executed separately from the diagnostic process.
+
+---
 
 ## Installation
 
-### Linux installer
+### Requirements
+
+- Python 3.11 or newer.
+- Linux environment.
+- pip.
+
+### Install from source
 
 Clone the repository:
 
 ```bash
 git clone https://github.com/Sapphire0507/pyDoctor.git
+```
+
+Navigate into the project:
+
+```bash
 cd pyDoctor
 ```
 
-Make the installer executable:
-
-```bash
-chmod +x scripts/install.sh
-```
-
-Run it:
+Run the installation script:
 
 ```bash
 ./scripts/install.sh
 ```
 
-The installer creates an isolated environment under:
+The installer creates an isolated installation under:
 
 ```text
-~/.local/share/pydoctor/
+~/.local/share/pydoctor
 ```
 
-It creates a command launcher at:
+It also installs the command-line launcher at:
 
 ```text
 ~/.local/bin/pydoctor
 ```
 
-If `~/.local/bin` is not in your PATH, add it:
+Make sure `~/.local/bin` is available in your PATH.
 
-```bash
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
+### Uninstallation
 
-Verify the installation:
-
-```bash
-pydoctor --help
-```
-
-### Manual installation
-
-You can also install pyDoctor using pip.
-
-Clone the repository:
-
-```bash
-git clone https://github.com/Sapphire0507/pyDoctor.git
-cd pyDoctor
-```
-
-Create and activate a virtual environment:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-Install the package:
-
-```bash
-pip install .
-```
-
-For development:
-
-```bash
-pip install -e ".[dev]"
-```
-
-### Windows
-
-The convenience shell installer targets Linux. On Windows, use a virtual environment and pip:
-
-```powershell
-git clone https://github.com/Sapphire0507/pyDoctor.git
-cd pyDoctor
-
-py -3 -m venv .venv
-.venv\Scripts\Activate.ps1
-
-python -m pip install .
-```
-
-## Usage
-
-### Diagnose a project
-
-Diagnose the current directory:
-
-```bash
-pydoctor diagnose .
-```
-
-Diagnose a specific project:
-
-```bash
-pydoctor diagnose /path/to/project
-```
-
-Display individual diagnostic findings:
-
-```bash
-pydoctor diagnose . --verbose
-```
-
-A diagnosis produces a `.pydz` diagnostic record.
-
-### Repair a project
-
-Use an existing PYDZ record:
-
-```bash
-pydoctor fix project.pydz
-```
-
-pyDoctor displays a repair plan and asks for confirmation before executing it.
-
-Skip interactive confirmation:
-
-```bash
-pydoctor fix project.pydz --yes
-```
-
-### Complete workflow
-
-Diagnose, repair, and verify a project:
-
-```bash
-pydoctor work .
-```
-
-Use an existing PYDZ record:
-
-```bash
-pydoctor work project.pydz
-```
-
-Automatically approve the repair plan:
-
-```bash
-pydoctor work . --yes
-```
-
-### Additional options
-
-Display command help:
-
-```bash
-pydoctor --help
-pydoctor diagnose --help
-pydoctor fix --help
-pydoctor work --help
-```
-
-Disable colored output:
-
-```bash
-pydoctor --no-color diagnose .
-```
-
-Run through Python:
-
-```bash
-python -m pydoctor diagnose .
-```
-
-## Uninstallation
-
-If installed using the Linux installer, run:
+To remove pyDoctor:
 
 ```bash
 ./scripts/uninstall.sh
 ```
 
-The uninstaller removes the isolated pyDoctor installation and its launcher.
+---
 
-It does not remove project files or PYDZ diagnostic records.
+## Usage
 
-For a manual pip installation:
+pyDoctor provides three primary commands:
 
-```bash
-python -m pip uninstall pydoctor
-```
+### 1. Diagnose
 
-## Building Distributions
-
-Install development dependencies:
+Inspect a Python project and identify potential issues.
 
 ```bash
-pip install -e ".[dev]"
+pydoctor diagnose .
 ```
 
-Build the source distribution and wheel:
+You can also specify a project directory:
+
+```bash
+pydoctor diagnose /path/to/project
+```
+
+#### Verbose Diagnostics
+
+Display individual diagnostic findings, including their descriptions, severity, locations, and recommendations.
+
+```bash
+pydoctor diagnose . --verbose
+```
+
+Short form:
+
+```bash
+pydoctor diagnose . -v
+```
+
+Verbose mode changes the amount of diagnostic information displayed, not the inspections performed.
+
+### 2. Fix
+
+Execute repairs using an existing PYDZ repair plan.
+
+```bash
+pydoctor fix project.pydz
+```
+
+To automatically approve repair operations:
+
+```bash
+pydoctor fix project.pydz --yes
+```
+
+Short form:
+
+```bash
+pydoctor fix project.pydz -y
+```
+
+### 3. Work
+
+Run the complete diagnostic and repair workflow.
+
+```bash
+pydoctor work
+```
+
+Specify a project directory:
+
+```bash
+pydoctor work /path/to/project
+```
+
+You can also provide an existing repair plan:
+
+```bash
+pydoctor work project.pydz
+```
+
+To automatically approve repairs:
+
+```bash
+pydoctor work --yes
+```
+
+Short form:
+
+```bash
+pydoctor work -y
+```
+
+---
+
+## Command Reference
+
+| Command | Description |
+|---|---|
+| `pydoctor diagnose .` | Diagnose the current project. |
+| `pydoctor diagnose . -v` | Display detailed diagnostic findings. |
+| `pydoctor fix project.pydz` | Execute a repair plan. |
+| `pydoctor fix project.pydz -y` | Execute repairs without interactive confirmation. |
+| `pydoctor work` | Run the complete workflow. |
+| `pydoctor work -y` | Run the complete workflow with automatic repair approval. |
+| `pydoctor --help` | Display command-line help. |
+| `pydoctor --no-color diagnose .` | Run diagnostics without colored output. |
+
+### Python Module Execution
+
+pyDoctor can also be invoked as a Python module:
+
+```bash
+python -m pydoctor diagnose .
+python -m pydoctor fix project.pydz
+python -m pydoctor work
+```
+
+---
+
+## Project Scope
+
+pyDoctor v1 focuses on Python project setup, environments, dependencies, configuration, and structure.
+
+It is not intended to be a complete static code analyzer, security scanner, or replacement for Python testing and linting tools.
+
+Its primary purpose is to help developers get Python projects into a valid and usable state.
+
+---
+
+## Building from Source
+
+To build the distributable package:
 
 ```bash
 ./scripts/build.sh
 ```
 
-The generated distributions are placed in:
+---
 
-```text
-dist/
-```
+## Testing
 
-You can also build directly:
+The project uses `pytest` for automated testing.
 
-```bash
-python -m build
-```
-
-Install a generated wheel:
+Run the test suite with:
 
 ```bash
-pip install dist/pydoctor-0.1.0-py3-none-any.whl
+pytest
 ```
 
-## Development
+---
 
-Clone the repository and install development dependencies:
+## Project Information
 
-```bash
-git clone https://github.com/Sapphire0507/pyDoctor.git
-cd pyDoctor
+| Property | Details |
+|---|---|
+| Name | pyDoctor |
+| Version | 0.1.0 |
+| Language | Python |
+| Interface | Command-line |
+| Minimum Python version | 3.11 |
+| Runtime dependency | `packaging` |
+| License | See repository license file |
 
-python3 -m venv .venv
-source .venv/bin/activate
+---
 
-pip install -e ".[dev]"
-```
+## Contributing
 
-Run the test suite:
+Contributions, suggestions, and bug reports are welcome.
 
-```bash
-pytest -v
-```
-
-## Development Status
-
-pyDoctor is actively under development.
-
-| Stage | Description | Status |
-|---|---|---|
-| 1 | Project Discovery and Environment Diagnostics | Completed |
-| 2 | Dependency Diagnostics | Completed |
-| 3 | Configuration and Project Structure Diagnostics | Completed |
-| 4 | Repair Engine and PYDZ Records | Completed |
-| 5 | CLI and Terminal Experience | Completed |
-| 6 | Installer, Uninstaller and Packaging | In Progress |
-| 7 | Testing, Documentation and v1.0 Release | Planned |
-
-## Technology
-
-- Python 3.11+
-- setuptools
-- Packaging
-- pytest
-- Python standard library
-
-## Project Goals
-
-pyDoctor aims to provide a straightforward way to:
-
-1. Identify whether a directory contains a valid Python project.
-2. Diagnose common project configuration and environment issues.
-3. Detect missing or incompatible dependencies.
-4. Create a virtual environment when one is missing.
-5. Repair supported issues automatically.
-6. Verify whether repairs were successful.
-7. Preserve diagnostic and repair history through PYDZ records.
-
-The focus is on project setup, configuration, dependencies, and environment maintenance—not full-scale static code analysis.
-
-## License
-
-pyDoctor is distributed under the MIT License. See [LICENSE](LICENSE).
+If you encounter an issue or have an idea for improving pyDoctor, feel free to open an issue or submit a pull request.
