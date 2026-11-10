@@ -3,7 +3,7 @@
 
 A Python project diagnostics and repair assistant.
 
-pyDoctor is a modular, command-line tool designed to inspect Python projects, identify common development environment and configuration issues, and perform safe, automated repairs.
+pyDoctor is a modular command-line tool designed to inspect Python projects, identify common development environment and configuration issues, and perform safe, automated repairs.
 
 Its goal is to take care of the repetitive setup and maintenance tasks involved in working with Python projects.
 
@@ -63,10 +63,21 @@ Its goal is to take care of the repetitive setup and maintenance tasks involved 
 - Interactive repair confirmation
 - Automatic confirmation with `--yes`
 - Verbose diagnostic output
+- Severity-based diagnostic summaries
 - Colored terminal output
 - Clear error handling
 
+## Requirements
+
+- Python 3.11 or newer
+- pip
+- Linux for the convenience installer scripts
+
+The Python package itself is platform-independent.
+
 ## Installation
+
+### Linux installer
 
 Clone the repository:
 
@@ -75,34 +86,85 @@ git clone https://github.com/Sapphire0507/pyDoctor.git
 cd pyDoctor
 ```
 
-Create a virtual environment:
+Make the installer executable:
 
 ```bash
-python -m venv .venv
+chmod +x scripts/install.sh
 ```
 
-Activate it:
+Run it:
 
-**Linux / macOS**
 ```bash
+./scripts/install.sh
+```
+
+The installer creates an isolated environment under:
+
+```text
+~/.local/share/pydoctor/
+```
+
+It creates a command launcher at:
+
+```text
+~/.local/bin/pydoctor
+```
+
+If `~/.local/bin` is not in your PATH, add it:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Verify the installation:
+
+```bash
+pydoctor --help
+```
+
+### Manual installation
+
+You can also install pyDoctor using pip.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Sapphire0507/pyDoctor.git
+cd pyDoctor
+```
+
+Create and activate a virtual environment:
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-**Windows**
-```powershell
-.venv\Scripts\activate
-```
-
-Install pyDoctor in editable mode:
+Install the package:
 
 ```bash
-pip install -e .
+pip install .
 ```
 
-To install development dependencies:
+For development:
 
 ```bash
 pip install -e ".[dev]"
+```
+
+### Windows
+
+The convenience shell installer targets Linux. On Windows, use a virtual environment and pip:
+
+```powershell
+git clone https://github.com/Sapphire0507/pyDoctor.git
+cd pyDoctor
+
+py -3 -m venv .venv
+.venv\Scripts\Activate.ps1
+
+python -m pip install .
 ```
 
 ## Usage
@@ -188,6 +250,76 @@ Run through Python:
 python -m pydoctor diagnose .
 ```
 
+## Uninstallation
+
+If installed using the Linux installer, run:
+
+```bash
+./scripts/uninstall.sh
+```
+
+The uninstaller removes the isolated pyDoctor installation and its launcher.
+
+It does not remove project files or PYDZ diagnostic records.
+
+For a manual pip installation:
+
+```bash
+python -m pip uninstall pydoctor
+```
+
+## Building Distributions
+
+Install development dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Build the source distribution and wheel:
+
+```bash
+./scripts/build.sh
+```
+
+The generated distributions are placed in:
+
+```text
+dist/
+```
+
+You can also build directly:
+
+```bash
+python -m build
+```
+
+Install a generated wheel:
+
+```bash
+pip install dist/pydoctor-0.1.0-py3-none-any.whl
+```
+
+## Development
+
+Clone the repository and install development dependencies:
+
+```bash
+git clone https://github.com/Sapphire0507/pyDoctor.git
+cd pyDoctor
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install -e ".[dev]"
+```
+
+Run the test suite:
+
+```bash
+pytest -v
+```
+
 ## Development Status
 
 pyDoctor is actively under development.
@@ -198,13 +330,14 @@ pyDoctor is actively under development.
 | 2 | Dependency Diagnostics | Completed |
 | 3 | Configuration and Project Structure Diagnostics | Completed |
 | 4 | Repair Engine and PYDZ Records | Completed |
-| 5 | CLI and Terminal Experience | In Progress |
-| 6 | Installer, Uninstaller and Packaging | Planned |
+| 5 | CLI and Terminal Experience | Completed |
+| 6 | Installer, Uninstaller and Packaging | In Progress |
 | 7 | Testing, Documentation and v1.0 Release | Planned |
 
 ## Technology
 
 - Python 3.11+
+- setuptools
 - Packaging
 - pytest
 - Python standard library
@@ -225,4 +358,4 @@ The focus is on project setup, configuration, dependencies, and environment main
 
 ## License
 
-See the repository for license information.
+pyDoctor is distributed under the MIT License. See [LICENSE](LICENSE).
