@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 from .core.engine import DiagnosticEngine
@@ -23,11 +24,9 @@ class PyDoctorWorkflow:
 
         report = engine.scan()
 
-        pydz_path = PydzManager.save_diagnostic(
+        return PydzManager.save_diagnostic(
             report
         )
-
-        return pydz_path
 
     def fix(
         self,
@@ -49,7 +48,7 @@ class PyDoctorWorkflow:
 
         project_or_pydz = project_or_pydz.resolve()
 
-        if project_or_pydz.suffix == ".pydz":
+        if project_or_pydz.suffix.lower() == ".pydz":
 
             document = PydzManager.load(
                 project_or_pydz
@@ -70,7 +69,7 @@ class PyDoctorWorkflow:
 
             report = engine.scan()
 
-            PydzManager.save_diagnosis(
+            PydzManager.save_diagnostic(
                 report,
                 pydz_path,
             )
@@ -96,6 +95,10 @@ class PyDoctorWorkflow:
         PydzManager.save_verification(
             pydz_path,
             verification_report,
-        ) 
+        )
 
-        return pydz_path, repair_report, verification_report
+        return (
+            pydz_path,
+            repair_report,
+            verification_report,
+        )

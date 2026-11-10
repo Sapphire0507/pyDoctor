@@ -7,6 +7,8 @@
         "pythonpath",
         "pyvenv",
         "setuptools",
-        "testpaths"
+        "siddharth",
+        "testpaths",
+        "venv"
     ]
 }
